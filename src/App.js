@@ -23,7 +23,10 @@ class App extends Component {
   render() {
 
     const characters = this.state.text.split('').map((letter, index) => {
-      return <CharComponent letter={letter} clicked={() => this.letterClickedHandler(index)} />
+      return <CharComponent
+        key={index}
+        letter={letter}
+        clicked={() => this.letterClickedHandler(index)} />
     });
 
 
