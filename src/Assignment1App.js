@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import UserInput from './UserInput/UserInput';
-import UserOutput from './UserOutput/UserOutput';
+import UserInput from './assignment1/UserInput/UserInput';
+import UserOutput from './assignment1/UserOutput/UserOutput';
 
 class App extends Component {
 
