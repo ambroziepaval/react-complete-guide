@@ -4,6 +4,7 @@ import Persons from '../components/Persons/Persons';
 import Cockpit from '../components/Cockpit/Cockpit';
 import withClass from '../hoc/withClass';
 import Aux from '../hoc/Auxiliary';
+import AuthContext from '../context/auth-context';
 
 class App extends Component {
   constructor(props) {
@@ -16,12 +17,14 @@ class App extends Component {
     persons: [
       { id: '1asa', name: 'Zica', age: 26 },
       { id: '2dsa', name: 'Manu', age: 17 },
-      { id: '3das', name: 'Ligia', age: 27 }
+      { id: '3das', name: 'Ligia', age: 27 },
     ],
     otherState: 'some other value',
     showPersons: false,
-    showCockpit: true
-  }
+    showCockpit: true,
+    changeCounter: 0,
+    authenticated: false,
+  };
 
   static getDerivedStateFromProps(props, state) {
     console.log('[App.js] getDerivedStateFromProps', props);
@@ -46,7 +49,7 @@ class App extends Component {
   // }
 
   nameChangedHandler = (event, id) => {
-    const personIndex = this.state.persons.findIndex(p => {
+    const personIndex = this.state.persons.findIndex((p) => {
       return p.id === id;
     });
 
@@ -57,20 +60,29 @@ class App extends Component {
     const persons = [...this.state.persons];
     persons[personIndex] = person;
 
-    this.setState({ persons: persons })
-  }
+    this.setState((prevState, props) => {
+      return {
+        persons: persons,
+        changeCounter: prevState.changeCounter + 1,
+      };
+    });
+  };
 
   deletePersonHandler = (personIndex) => {
     // const persons = this.state.persons.slice();
     const persons = [...this.state.persons];
     persons.splice(personIndex, 1);
-    this.setState({ persons: persons })
-  }
+    this.setState({ persons: persons });
+  };
 
   togglePersonsHandler = () => {
     const doesShow = this.state.showPersons;
     this.setState({ showPersons: !doesShow });
-  }
+  };
+
+  loginHandler = () => {
+    this.setState({ authenticated: true });
+  };
 
   render() {
     console.log('[App.js] render');
@@ -82,22 +94,34 @@ class App extends Component {
           <Persons
             persons={this.state.persons}
             clicked={this.deletePersonHandler}
-            changed={this.nameChangedHandler} />
+            changed={this.nameChangedHandler}
+            isAuthenticated={this.state.authenticated}
+          />
         </div>
       );
     }
 
     return (
       <Aux>
-        <button onClick={() => this.setState({ showCockpit: false })}>Remove Cockpit</button>
-        {this.state.showCockpit ?
-          <Cockpit
-            title={this.props.appTitle}
-            showPersons={this.state.showPersons}
-            personsLength={this.state.persons.length}
-            clicked={this.togglePersonsHandler} />
-          : null}
-        {persons}
+        <button onClick={() => this.setState({ showCockpit: false })}>
+          Remove Cockpit
+        </button>
+        <AuthContext.Provider
+          value={{
+            authenticated: this.state.authenticated,
+            login: this.loginHandler,
+          }}
+        >
+          {this.state.showCockpit ? (
+            <Cockpit
+              title={this.props.appTitle}
+              showPersons={this.state.showPersons}
+              personsLength={this.state.persons.length}
+              clicked={this.togglePersonsHandler}
+            />
+          ) : null}
+          {persons}
+        </AuthContext.Provider>
       </Aux>
     );
     // return React.createElement('div', {className:'App'}, React.createElement('h1', null, 'Does this work now?'))
